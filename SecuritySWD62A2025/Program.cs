@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using SecuritySWD62A2025.Data;
+using SecuritySWD62A2025.Repositories;
 
 namespace SecuritySWD62A2025
 {
@@ -42,6 +43,10 @@ namespace SecuritySWD62A2025
                 options.Password.RequireLowercase = true; // Require at least one lowercase letter
 
             });
+
+
+            builder.Services.AddScoped<ArtifactsRepository>();
+            builder.Services.AddScoped<ArticlesRepository>();
 
             var app = builder.Build();
 

@@ -1,10 +1,14 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using SecuritySWD62A2025.Models.DatabaseModels;
 using SecuritySWD62A2025.Repositories;
 using System.Net;
 
 namespace SecuritySWD62A2025.Controllers
 {
+    [Authorize]
+    //the effect of such attribute enforces any user getting into this controller be logged in
+    //on top of the controller means that all the actions inside the controller are protected
     public class ArticleController : Controller
     {
         ArticlesRepository _articlesRepository;
@@ -61,18 +65,46 @@ namespace SecuritySWD62A2025.Controllers
             string uniqueFilename = Guid.NewGuid().ToString() + System.IO.Path.GetExtension(file.FileName);
             string absolutePath = host.ContentRootPath + "//Data//UserFiles//" + uniqueFilename;
 
-            if (file != null)
+            if (file != null) //file validation
             {
 
-                //file validation!!!!
-                if(System.IO.Path.GetExtension(file.FileName) != ".pdf")
+                if (file.Length > (1024 * 1024 * 1024))
+                {
+                    TempData["error"] = "File sizes accepted up to 1MB";
+                    return View();
+                }
+
+
+                if(System.IO.Path.GetExtension(file.FileName) != ".jpg" &&
+                   System.IO.Path.GetExtension(file.FileName) != ".pdf")
                 {
                     TempData["error"] = "File type not allowed";
                     return View();
                 }
 
-                using (var fs = System.IO.File.OpenWrite(uniqueFilename))
+
+                //check the file header to make sure that this is a jpg or pdf 100%
+                //255 216
+                byte[] whitelistForJPG = { 255, 216 };
+
+                MemoryStream msIn = new MemoryStream();
+                file.CopyTo(msIn);
+
+                byte[] inputFile = msIn.ToArray();
+
+                for (int b = 0; b < whitelistForJPG.Length; b++)
                 {
+                    if (whitelistForJPG[b] != inputFile[b])
+                    {
+                        TempData["error"] = "File type is not accepted. Upload jpg files";
+                        return View();
+                    }
+                }
+
+                //C:/..../.../..../uniquefilename
+                using (var fs = System.IO.File.OpenWrite(absolutePath))
+                {
+                    fs.Position = 0;
                     file.CopyTo(fs);
                 } //this is the line which is going to close the copied file leaving the data on the webserver
             }
@@ -84,8 +116,8 @@ namespace SecuritySWD62A2025.Controllers
                 Path = "//Data//UserFiles//" + uniqueFilename
             };
             _artifactRepository.AddArtifact(myArtifact);
-            
 
+            TempData["message"] = "Artifact saved successfully";
 
             return View();
 
