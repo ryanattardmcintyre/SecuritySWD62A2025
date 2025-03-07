@@ -3,12 +3,12 @@ using SecuritySWD62A2025.Models.DatabaseModels;
 
 namespace SecuritySWD62A2025.Repositories
 {
-    public class ArtifactsRepository
+    public class ArtifactsRepository: BaseRepository
     {
-        ApplicationDbContext _dbContext;
-        public ArtifactsRepository(ApplicationDbContext dbContext)
+       
+        public ArtifactsRepository(ApplicationDbContext dbContext): base(dbContext) 
         {
-            _dbContext = dbContext;
+           
         }
 
 

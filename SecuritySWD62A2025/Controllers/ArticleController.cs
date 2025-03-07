@@ -35,93 +35,105 @@ namespace SecuritySWD62A2025.Controllers
         //result: when the app is running host will be auto -initialized for me
         public IActionResult Create(string title, string content, IFormFile file, [FromServices] IWebHostEnvironment host )
         {
-            //to do
-            //1. validate the file being uploaded
-            //2. test the entries being saved in the database
-            //3. what if one of the things fails? -introducing transactions!
-            //4. validators
 
-
-
-            //xss safe
-            title = WebUtility.HtmlEncode(title);
-            content = WebUtility.HtmlEncode(content);
-
-            //creation of an article
-            Article myArticle = new Article()
+            var transaction = _articlesRepository._dbContext.Database.BeginTransaction();
+            try
             {
-                Title = title,
-                Content = content,
-                AuthorFK = User.Identity.Name, //this is how to get the name of the logged in user
-                Id = Guid.NewGuid(),
-                CreatedDate = DateTime.Now,
-                UpdatedDate = DateTime.Now
-            };
+                //to do
+                //1. validate the file being uploaded
+                //2. test the entries being saved in the database
+                //3. what if one of the things fails? -introducing transactions!
+                //4. validators
 
-            //save the article to the database
-            _articlesRepository.AddArticle(myArticle);
+                //1. ----------------------------- SECTION 1 - SAVING ARTICLE --------------------------------------
 
-            //code that will upload the file
-            string uniqueFilename = Guid.NewGuid().ToString() + System.IO.Path.GetExtension(file.FileName);
-            string absolutePath = host.ContentRootPath + "//Data//UserFiles//" + uniqueFilename;
+                //xss safe
+                title = WebUtility.HtmlEncode(title);
+                content = WebUtility.HtmlEncode(content);
 
-            if (file != null) //file validation
-            {
-
-                if (file.Length > (1024 * 1024 * 1024))
+                //creation of an article
+                Article myArticle = new Article()
                 {
-                    TempData["error"] = "File sizes accepted up to 1MB";
-                    return View();
-                }
+                    Title = title,
+                    Content = content,
+                    AuthorFK = User.Identity.Name, //this is how to get the name of the logged in user
+                    Id = Guid.NewGuid(),
+                    CreatedDate = DateTime.Now,
+                    UpdatedDate = DateTime.Now
+                };
 
+                //save the article to the database
+                _articlesRepository.AddArticle(myArticle); //<<<<<<<<<<<<<<<<<<<<< saving into db
+ 
 
-                if(System.IO.Path.GetExtension(file.FileName) != ".jpg" &&
-                   System.IO.Path.GetExtension(file.FileName) != ".pdf")
+                //2. ----------------------------- SECTION 2 - UPLOADING --------------------------------------
+
+                //code that will upload the file
+                string uniqueFilename = Guid.NewGuid().ToString() + System.IO.Path.GetExtension(file.FileName);
+                string absolutePath = host.ContentRootPath + "//Data//UserFiles//" + uniqueFilename;
+
+                if (file != null) //file validation
                 {
-                    TempData["error"] = "File type not allowed";
-                    return View();
-                }
-
-
-                //check the file header to make sure that this is a jpg or pdf 100%
-                //255 216
-                byte[] whitelistForJPG = { 255, 216 };
-
-                MemoryStream msIn = new MemoryStream();
-                file.CopyTo(msIn);
-
-                byte[] inputFile = msIn.ToArray();
-
-                for (int b = 0; b < whitelistForJPG.Length; b++)
-                {
-                    if (whitelistForJPG[b] != inputFile[b])
+                    if (file.Length > (1024 * 1024 * 1024))
                     {
-                        TempData["error"] = "File type is not accepted. Upload jpg files";
-                        return View();
+                        TempData["error"] = "File sizes accepted up to 1MB";
+                        throw new Exception("File sizes accepted up to 1MB");
                     }
+
+                    if (System.IO.Path.GetExtension(file.FileName) != ".jpg" &&
+                       System.IO.Path.GetExtension(file.FileName) != ".pdf")
+                    {
+                        TempData["error"] = "File type not allowed";
+                        throw new Exception("File type not allowed");
+                    }
+
+
+                    //check the file header to make sure that this is a jpg or pdf 100%
+                    //255 216
+                    byte[] whitelistForJPG = { 255, 216 };
+
+                    MemoryStream msIn = new MemoryStream();
+                    file.CopyTo(msIn);
+
+                    byte[] inputFile = msIn.ToArray();
+
+                    for (int b = 0; b < whitelistForJPG.Length; b++)
+                    {
+                        if (whitelistForJPG[b] != inputFile[b])
+                        {
+                            TempData["error"] = "File type is not accepted. Upload jpg files";
+                            throw new Exception(TempData["error"].ToString());
+                        }
+                    }
+
+                    //C:/..../.../..../uniquefilename
+                    using (var fs = System.IO.File.OpenWrite(absolutePath))
+                    {
+                        fs.Position = 0;
+                        file.CopyTo(fs);
+                    } //this is the line which is going to close the copied file leaving the data on the webserver
                 }
 
-                //C:/..../.../..../uniquefilename
-                using (var fs = System.IO.File.OpenWrite(absolutePath))
+                //3. ----------------------------- SECTION 3 - SAVING ARTICLE INFO IN DB --------------------------------------
+                //save the file entry into the database
+                Artifact myArtifact = new Artifact()
                 {
-                    fs.Position = 0;
-                    file.CopyTo(fs);
-                } //this is the line which is going to close the copied file leaving the data on the webserver
+                    ArticleFK = myArticle.Id,
+                    Path = "//Data//UserFiles//" + uniqueFilename
+                };
+                _artifactRepository.AddArtifact(myArtifact);
+
+                TempData["message"] = "Artifact saved successfully";
+
+                transaction.Commit(); //saves permanently into the db
+            }
+            catch (Exception ex)
+            {
+                transaction.Rollback(); //closes off transaction hence temporary save data is erased
+                TempData["error"] = "Operation failed";
             }
 
-            //save the file entry into the database
-            Artifact myArtifact = new Artifact()
-            {
-                ArticleFK = myArticle.Id,
-                Path = "//Data//UserFiles//" + uniqueFilename
-            };
-            _artifactRepository.AddArtifact(myArtifact);
-
-            TempData["message"] = "Artifact saved successfully";
-
             return View();
-
-
 
         }
     }
