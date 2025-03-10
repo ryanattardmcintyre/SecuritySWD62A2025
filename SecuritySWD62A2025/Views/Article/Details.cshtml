@@ -1,0 +1,30 @@
+﻿@model SecuritySWD62A2025.Models.DetailsArticleViewModel
+
+@{
+    ViewData["Title"] = Model.Article.Title;
+}
+
+<h2>@Model.Article.Title</h2>
+
+<p><strong>Author:</strong> @Model.Article.AuthorFK</p>
+<p><strong>Created on:</strong> @Model.Article.CreatedDate.ToString("yyyy-MM-dd")</p>
+<p><strong>Last updated:</strong> @Model.Article.UpdatedDate.ToString("yyyy-MM-dd")</p>
+
+<hr>
+
+<p>@Model.Article.Content</p>
+
+<hr>
+
+<h2>Files</h2>
+
+
+<ul>
+    @foreach(var f in Model.Artifacts)
+    {
+        <li><a href="/Article/Download?id=@f.Id">Download @System.IO.Path.GetFileName(f.Path)</a></li>
+    }
+</ul>
+
+<a asp-action="Index" class="btn btn-secondary">Back to List</a>
+ 

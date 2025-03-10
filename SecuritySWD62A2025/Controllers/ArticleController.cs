@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using SecuritySWD62A2025.ActionFilters;
+using SecuritySWD62A2025.Models;
 using SecuritySWD62A2025.Models.DatabaseModels;
 using SecuritySWD62A2025.Repositories;
 using System.Net;
@@ -18,10 +20,14 @@ namespace SecuritySWD62A2025.Controllers
             _artifactRepository = artifactsRepository;
         }
 
-
+        //1. write the repo methods
+        //2. controller action
+        //3. create the view
         public IActionResult Index()
         {
-            return View();
+            var list = _articlesRepository.GetArticles();
+
+            return View(list);
         }
 
 
@@ -135,6 +141,33 @@ namespace SecuritySWD62A2025.Controllers
 
             return View();
 
+        }
+
+
+        //choosing identification data types as GUIDs over INT makes it more secure and more difficult
+        //for an attacker to guess some other resource behind the id
+        [ArticleActionFilter]
+        public IActionResult Details(string id)
+        {
+            var article = _articlesRepository.GetArticles().SingleOrDefault(x => x.Id.ToString() == id);
+            
+            if(article == null)
+            {
+                return RedirectToAction("Index");
+            }
+
+            var files = _artifactRepository.GetArtifacts(id);
+
+            DetailsArticleViewModel myModel = new DetailsArticleViewModel();
+            myModel.Article = article;
+            myModel.Artifacts = files.ToList();
+
+            return View(myModel);
+            
+        }
+
+        public IActionResult Download(string id) {
+            return View(); //returns a file 
         }
     }
 }

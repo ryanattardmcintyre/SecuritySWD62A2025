@@ -1,0 +1,34 @@
+﻿@model IEnumerable<SecuritySWD62A2025.Models.DatabaseModels.Article>
+
+@{
+    ViewData["Title"] = "Articles List";
+}
+
+<h2>Articles</h2>
+<a asp-action="Create" class="btn btn-primary mb-3">Create New Article</a>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Title</th>
+            <th>Author</th>
+            <th>Created Date</th>
+            <th>Updated Date</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var article in Model)
+        {
+            <tr>
+                <td>@article.Title</td>
+                <td>@article.AuthorFK</td>
+                <td>@article.CreatedDate.ToString("yyyy-MM-dd")</td>
+                <td>@article.UpdatedDate.ToString("yyyy-MM-dd")</td>
+                <td>
+                  <a href="/Article/Details?id=@article.Id">View Article</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

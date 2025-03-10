@@ -18,5 +18,10 @@ namespace SecuritySWD62A2025.Repositories
             _dbContext.SaveChanges();
         }
 
+        public IQueryable<Artifact> GetArtifacts(string articleId)
+        {
+            return _dbContext.Artifacts.Where(x=>x.ArticleFK.ToString() ==articleId);
+        }
+
     }
 }

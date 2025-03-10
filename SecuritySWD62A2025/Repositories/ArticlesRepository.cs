@@ -55,5 +55,44 @@ namespace SecuritySWD62A2025.Repositories
             }
 
         }
+
+        public void AddPermission(Guid articleId, string user)
+        {
+            var permission = _dbContext.Permissions.SingleOrDefault(p => p.UsernameFK == user && p.ArticleFK == articleId);
+            if (permission == null)
+            {
+                _dbContext.Permissions.Add(new Permission()
+                {
+                    ArticleFK = articleId,
+                    UsernameFK = user
+                });
+
+                _dbContext.SaveChanges();
+            }
+        }
+        public void DeletePermission(Guid articleId, string user) {
+
+            /*foreach(var p in _dbContext.Permissions)
+            {
+                if (p.UsernameFK == user && p.ArticleFK == articleId) return p;
+            }*/
+
+            var permissionToDelete = _dbContext.Permissions.SingleOrDefault(p => p.UsernameFK == user && p.ArticleFK == articleId);
+            _dbContext.Permissions.Remove(permissionToDelete);
+            _dbContext.SaveChanges();
+        }
+
+        public bool IsUserAllowedToViewArticle(Guid articleId, string user)
+        {
+            var permission =_dbContext.Permissions.SingleOrDefault(x=>x.ArticleFK == articleId && 
+                                                        x.UsernameFK==user);
+            if (permission == null)
+            {
+                return false;
+            }
+            return true;
+
+        }
+
     }
 }
