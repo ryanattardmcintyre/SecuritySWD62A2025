@@ -9,21 +9,29 @@ namespace SecuritySWD62A2025.ActionFilters
    
         public override void OnActionExecuting(ActionExecutingContext context)
         {
-            string loggedInUser = context.HttpContext.User.Identity.Name; //email of logged in user
-            string articleId = context.HttpContext.Request.Query["id"].ToString();
+            try
+            {
+                string loggedInUser = context.HttpContext.User.Identity.Name; //email of logged in user
+                string articleId = context.HttpContext.Request.Query["id"].ToString();
 
-            //using this type of injection so as not to modify the method and class signature BECAUSE we are
-            //inheriting
+                if (loggedInUser == "" || articleId == "") context.Result = new ForbidResult();
 
-            ArticlesRepository articlesRepository = context.HttpContext.RequestServices.GetService<ArticlesRepository>();
+                //using this type of injection so as not to modify the method and class signature BECAUSE we are
+                //inheriting
 
-            bool check = articlesRepository.IsUserAllowedToViewArticle(new Guid(articleId), loggedInUser);
+                ArticlesRepository articlesRepository = context.HttpContext.RequestServices.GetService<ArticlesRepository>();
 
-            if (check == false)
+                bool check = articlesRepository.IsUserAllowedToViewArticle(new Guid(articleId), loggedInUser);
+
+                if (check == false)
+                {
+                    context.Result = new ForbidResult();
+                }
+            }
+            catch (Exception ex)
             {
                 context.Result = new ForbidResult();
             }
-
             base.OnActionExecuting(context);
         }
 

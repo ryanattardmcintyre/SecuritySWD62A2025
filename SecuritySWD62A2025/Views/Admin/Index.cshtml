@@ -1,0 +1,32 @@
+﻿@model SecuritySWD62A2025.Models.PermissionsViewModel
+@{
+    ViewData["Title"] = "Allocate Article to User";
+}
+
+<h2>Allocate Article to User</h2>
+
+<form asp-controller="Admin" asp-action="AllocatePermissionToArticle" method="post">
+    <div class="mb-3">
+        <label for="email" class="form-label">Select User Email</label>
+        <select id="email" name="email" class="form-select" required>
+            <option value="">-- Select User --</option>
+            @foreach (var email in Model.Users)
+            {
+                <option value="@email">@email</option>
+            }
+        </select>
+    </div>
+
+    <div class="mb-3">
+        <label for="articleId" class="form-label">Select Article</label>
+        <select id="articleId" name="articleId" class="form-select" required>
+            <option value="">-- Select Article --</option>
+            @foreach (var article in Model.Articles)
+            {
+                <option value="@article.Id">@article.Title</option>
+            }
+        </select>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Allocate Article</button>
+</form>
