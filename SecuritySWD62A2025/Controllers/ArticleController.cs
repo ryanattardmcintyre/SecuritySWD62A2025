@@ -4,6 +4,7 @@ using SecuritySWD62A2025.ActionFilters;
 using SecuritySWD62A2025.Models;
 using SecuritySWD62A2025.Models.DatabaseModels;
 using SecuritySWD62A2025.Repositories;
+using SecuritySWD62A2025.Utilities;
 using System.Net;
 
 namespace SecuritySWD62A2025.Controllers
@@ -15,9 +16,12 @@ namespace SecuritySWD62A2025.Controllers
     {
         ArticlesRepository _articlesRepository;
         ArtifactsRepository _artifactRepository;
-        public ArticleController(ArticlesRepository articlesRepository, ArtifactsRepository artifactsRepository) { 
+        EncryptionUtility _encryptionUtility;
+        public ArticleController(ArticlesRepository articlesRepository, ArtifactsRepository artifactsRepository,
+             EncryptionUtility encryptionUtility) { 
          _articlesRepository = articlesRepository;
             _artifactRepository = artifactsRepository;
+            _encryptionUtility = encryptionUtility;
         }
 
         //1. write the repo methods
@@ -25,7 +29,7 @@ namespace SecuritySWD62A2025.Controllers
         //3. create the view
         public IActionResult Index()
         {
-            var list = _articlesRepository.GetArticles();
+            var list = _articlesRepository.GetArticles().ToList();
 
             return View(list);
         }
@@ -67,7 +71,8 @@ namespace SecuritySWD62A2025.Controllers
                     AuthorFK = User.Identity.Name, //this is how to get the name of the logged in user
                     Id = Guid.NewGuid(),
                     CreatedDate = DateTime.Now,
-                    UpdatedDate = DateTime.Now
+                    UpdatedDate = DateTime.Now,
+                    Digest = _encryptionUtility.Hash(content)
                 };
 
                 //save the article to the database
@@ -157,6 +162,13 @@ namespace SecuritySWD62A2025.Controllers
             {
                 return RedirectToAction("Index");
             }
+
+            string digest = _encryptionUtility.Hash(article.Content);
+            if (digest != article.Digest)
+            {
+                TempData["error"] = "Warning: Article content has been tampered!!";
+            }
+
 
             var files = _artifactRepository.GetArtifacts(id);
 

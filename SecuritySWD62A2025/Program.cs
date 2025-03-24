@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using SecuritySWD62A2025.Data;
 using SecuritySWD62A2025.Repositories;
+using SecuritySWD62A2025.Utilities;
 
 namespace SecuritySWD62A2025
 {
@@ -48,6 +49,7 @@ namespace SecuritySWD62A2025
 
             builder.Services.AddScoped<ArtifactsRepository>();
             builder.Services.AddScoped<ArticlesRepository>();
+            builder.Services.AddScoped<EncryptionUtility>();
 
             var app = builder.Build();
 
