@@ -39,6 +39,8 @@ namespace SecuritySWD62A2025.Controllers
         //iwebhostenvironment is a built-in framework service which facilitates the reading of folder paths
         //one way of requesting the IWebHostEnvironment is to use method injection
         //result: when the app is running host will be auto -initialized for me
+
+        [ValidateAntiForgeryToken]
         public IActionResult Create(string title, string content, IFormFile file, [FromServices] IWebHostEnvironment host )
         {
 
