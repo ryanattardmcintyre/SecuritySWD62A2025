@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using SecuritySWD62A2025.Data;
 using SecuritySWD62A2025.Repositories;
 using SecuritySWD62A2025.Utilities;
+using System.Security.Cryptography;
 
 namespace SecuritySWD62A2025
 {
@@ -50,8 +51,9 @@ namespace SecuritySWD62A2025
             builder.Services.AddScoped<ArtifactsRepository>();
             builder.Services.AddScoped<ArticlesRepository>();
             builder.Services.AddScoped<EncryptionUtility>();
-
+           
             var app = builder.Build();
+           
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())

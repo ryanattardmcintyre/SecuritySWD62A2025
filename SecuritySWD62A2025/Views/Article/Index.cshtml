@@ -1,4 +1,6 @@
 ﻿@model IEnumerable<SecuritySWD62A2025.Models.DatabaseModels.Article>
+@inject SecuritySWD62A2025.Utilities.EncryptionUtility encUtility
+
 
 @{
     ViewData["Title"] = "Articles List";
@@ -26,6 +28,15 @@
                 <td>@article.CreatedDate.ToString("yyyy-MM-dd")</td>
                 <td>@article.UpdatedDate.ToString("yyyy-MM-dd")</td>
                 <td>
+
+                    @{
+                       // var encryptedQuerystringValue = encUtility.SymmetricEncrypt(article.Id.ToString(), 
+                        // System.Security.Cryptography.Aes.Create(),
+                       //  )
+                    
+                    }
+
+
                   <a href="/Article/Details?id=@article.Id">View Article</a>
                 </td>
             </tr>

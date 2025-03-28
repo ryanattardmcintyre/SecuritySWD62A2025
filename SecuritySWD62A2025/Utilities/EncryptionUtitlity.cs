@@ -51,6 +51,59 @@ namespace SecuritySWD62A2025.Utilities
             return symmetricKeys;
         }
 
+
+        public MemoryStream SymmetricEncrypt(MemoryStream inputStream, SymmetricAlgorithm alg, SymmetricKeys keys)
+        {
+            //Creating a memorystream to be used throughout the method, because it gives us
+            //two important methods that facilitate the work a lot
+            //1. CopyTo()
+            //2. ToArray()
+            //Step 1 - We reset the position of the inputStream so we make sure that we start encrypting byte no 0
+            inputStream.Position = 0;
+
+            //Step 2 - inject the received keys into the algorithm
+            alg.Key = keys.SecretKey;
+            alg.IV = keys.IV;
+
+            //Step 3 - Preparing a stream object where to store the cipher data
+            MemoryStream outputStream = new MemoryStream();
+
+            //Step 4 - start the encryption engine
+            //Approach 1 - are you going to read from the inputStream
+            // CryptoStream cryptoStream = new CryptoStream(inputStream, alg.CreateEncryptor(), CryptoStreamMode.Read);
+
+            //Approach 2 - are you going to write to the outputStream
+            using (CryptoStream cryptoStream = new CryptoStream(outputStream, alg.CreateEncryptor(), CryptoStreamMode.Write))
+            {
+                //Step 5 - this code depends on which approach you have chosen
+                //Feeding the clear data into the cryptoStream
+                //that the data will be scrambled automatically
+                inputStream.CopyTo(cryptoStream);
+
+                //Step 6 - finding a way how to flush the data out of the CryptoStream into the outputStream
+                cryptoStream.Flush();
+            }
+
+            //Step 7 - return the cipher
+            outputStream.Position = 0; //to ensure  next time i access the outputstream it starts reading from 0
+            return outputStream;
+        }
+
+        public string SymmetricEncrypt(string input, SymmetricAlgorithm alg, SymmetricKeys keys)
+        {
+            //Convert from string -> memorystream
+            byte[] inputBytes = Encoding.UTF32.GetBytes(input);
+            MemoryStream inputStream = new MemoryStream(inputBytes);
+
+            //Encrypt
+            MemoryStream cipherStream = SymmetricEncrypt(inputStream, alg, keys); //base64 encrypted data
+
+
+            //Convert from memorystream -> string
+            byte[] cipherBytes = cipherStream.ToArray();
+            return Convert.ToBase64String(cipherBytes);
+        }
+
     }
 
     public class SymmetricKeys
