@@ -73,12 +73,12 @@ namespace SecuritySWD62A2025.Utilities
             // CryptoStream cryptoStream = new CryptoStream(inputStream, alg.CreateEncryptor(), CryptoStreamMode.Read);
 
             //Approach 2 - are you going to write to the outputStream
-            using (CryptoStream cryptoStream = new CryptoStream(outputStream, alg.CreateEncryptor(), CryptoStreamMode.Write))
+            using (CryptoStream cryptoStream = new CryptoStream(inputStream, alg.CreateEncryptor(), CryptoStreamMode.Read))
             {
                 //Step 5 - this code depends on which approach you have chosen
                 //Feeding the clear data into the cryptoStream
                 //that the data will be scrambled automatically
-                inputStream.CopyTo(cryptoStream);
+                cryptoStream.CopyTo(outputStream);
 
                 //Step 6 - finding a way how to flush the data out of the CryptoStream into the outputStream
                 cryptoStream.Flush();
@@ -102,6 +102,27 @@ namespace SecuritySWD62A2025.Utilities
             //Convert from memorystream -> string
             byte[] cipherBytes = cipherStream.ToArray();
             return Convert.ToBase64String(cipherBytes);
+        }
+
+
+
+        public MemoryStream SymmetricDecrypt(MemoryStream inputEncryptedStream, SymmetricAlgorithm alg, SymmetricKeys keys)
+        {
+
+            //1. in the alg assign the keys
+
+            //2. reset the postiion of inputEncryptedStream to 0
+
+            //3. prepare an output Stream that will contain clear data
+
+            //4. create a CryptoStream passing the (inputEncryptedStream, DECRYPTOR: alg.CreateDecryptor(), Read)
+
+            //5. create a using {...} in which you will copy from cryptoStream to outputStream the dec bytes
+
+            //6. reset the position of the output stream to 0
+
+            //7. return outputstream
+            return null; //<< this is temporary
         }
 
     }

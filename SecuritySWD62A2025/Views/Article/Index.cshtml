@@ -30,14 +30,31 @@
                 <td>
 
                     @{
-                       // var encryptedQuerystringValue = encUtility.SymmetricEncrypt(article.Id.ToString(), 
-                        // System.Security.Cryptography.Aes.Create(),
-                       //  )
-                    
+
+                        string [] keys = System.IO.File.ReadAllLines("myKeys.txt");
+
+                        SecuritySWD62A2025.Utilities.SymmetricKeys myKeys = new
+                                           SecuritySWD62A2025.Utilities.SymmetricKeys()
+                                {
+                                    SecretKey = Convert.FromBase64String(keys[0]),
+                                    IV = Convert.FromBase64String(keys[1])
+                                };
+
+
+                        var encryptedQuerystringValue = encUtility.SymmetricEncrypt(article.Id.ToString(),
+                        System.Security.Cryptography.Aes.Create(),
+                         myKeys
+                        );
+
+
+                        encryptedQuerystringValue= encryptedQuerystringValue.Replace("+", "$");
+                        encryptedQuerystringValue = encryptedQuerystringValue.Replace("==", "|");
+                        encryptedQuerystringValue = encryptedQuerystringValue.Replace("/", "*");
+
+                        //Remember to change back these values when you're reading for decryption i.e. ActionFilter
                     }
 
-
-                  <a href="/Article/Details?id=@article.Id">View Article</a>
+                  <a href="/Article/Details?id=@encryptedQuerystringValue">View Article</a>
                 </td>
             </tr>
         }

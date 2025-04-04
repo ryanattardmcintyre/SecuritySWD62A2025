@@ -53,7 +53,27 @@ namespace SecuritySWD62A2025
             builder.Services.AddScoped<EncryptionUtility>();
            
             var app = builder.Build();
-           
+
+
+            if (System.IO.File.Exists("myKeys.txt") == false)
+            {
+                using (var scope = app.Services.CreateScope())
+                {
+                    var encryptionUtility = scope.ServiceProvider.GetRequiredService<SecuritySWD62A2025.Utilities.EncryptionUtility>();
+
+                    // Example usage
+                    var result = encryptionUtility.GenerateSymmetricKeys(System.Security.Cryptography.Aes.Create());
+
+                    using (var sw = System.IO.File.CreateText("myKeys.txt"))
+                    {
+                        sw.WriteLine(Convert.ToBase64String(result.SecretKey));
+                        sw.WriteLine(Convert.ToBase64String(result.IV));
+                    }
+                }
+            }
+
+
+
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())

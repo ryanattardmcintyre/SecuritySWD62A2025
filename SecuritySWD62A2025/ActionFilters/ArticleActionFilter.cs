@@ -14,6 +14,9 @@ namespace SecuritySWD62A2025.ActionFilters
                 string loggedInUser = context.HttpContext.User.Identity.Name; //email of logged in user
                 string articleId = context.HttpContext.Request.Query["id"].ToString();
 
+                //To do: Implement the decryption to decrypt the article Id
+
+
                 if (loggedInUser == "" || articleId == "") context.Result = new ForbidResult();
 
                 //using this type of injection so as not to modify the method and class signature BECAUSE we are

@@ -156,6 +156,8 @@ namespace SecuritySWD62A2025.Controllers
         [ArticleActionFilter]
         public IActionResult Details(string id)
         {
+            //To do: decrypt the id received
+
             var article = _articlesRepository.GetArticles().SingleOrDefault(x => x.Id.ToString() == id);
             
             if(article == null)
