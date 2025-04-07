@@ -1,5 +1,6 @@
 ﻿using System.Text;
 using System.Security.Cryptography;
+using SecuritySWD62A2025.Models.DatabaseModels;
 
 
 namespace SecuritySWD62A2025.Utilities
@@ -123,6 +124,57 @@ namespace SecuritySWD62A2025.Utilities
 
             //7. return outputstream
             return null; //<< this is temporary
+        }
+
+        public AsymmetricKeys GenerateAsymmetricKeys()
+        {
+            RSACryptoServiceProvider rsa = new RSACryptoServiceProvider();
+
+            AsymmetricKeys keys = new AsymmetricKeys();
+            keys.PublicKey = rsa.ToXmlString(false);
+            keys.PrivateKey = rsa.ToXmlString(true);
+
+            return keys;
+
+        }
+
+        //hello world X = input has to be base64
+        public byte[] AsymmetricEncryption(byte[] input, string publicKey)
+        {
+            RSACryptoServiceProvider rsa = new RSACryptoServiceProvider();
+            rsa.FromXmlString(publicKey);
+
+            byte [] cipher = rsa.Encrypt(input, true);
+            return cipher;
+        }
+
+        public byte[] AsymmetricDecryption(byte[] cipher, string privateKey)
+        {
+            return null;
+        }
+
+        public MemoryStream HybridEncrypt(MemoryStream input, string publicKey)
+        {
+            //1. generate the symm keys
+            var symmKeys = GenerateSymmetricKeys(Aes.Create() );
+
+            //2. symm enc the input
+            var cipher = SymmetricEncrypt(input, Aes.Create(), symmKeys);
+
+            //3. asymm enc the keys
+            var encKey = AsymmetricEncryption(symmKeys.SecretKey, publicKey);
+            var encIv = AsymmetricEncryption(symmKeys.IV, publicKey);
+
+            //4. package everything in the same memorystream
+            MemoryStream output = new MemoryStream();
+            output.Write(encKey, 0, encKey.Length); //0
+            output.Write(encIv, 0, encIv.Length); //where it has left from the prior line
+            cipher.Position = 0;
+            cipher.CopyTo(output);
+            output.Position = 0;
+            output.Close();
+            
+            return output;
         }
 
     }

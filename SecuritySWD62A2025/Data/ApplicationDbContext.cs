@@ -18,6 +18,7 @@ namespace SecuritySWD62A2025.Data
         public DbSet<Article> Articles { get; set; }
         public DbSet<Artifact> Artifacts { get; set; }
         public DbSet<Permission> Permissions { get; set; }
+        public DbSet<AsymmetricKeys> AsymmetricKeys { get; set; }
 
     }
 }

@@ -14,6 +14,8 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging;
+using SecuritySWD62A2025.Utilities;
+using SecuritySWD62A2025.Repositories;
 
 namespace SecuritySWD62A2025.Areas.Identity.Pages.Account
 {
@@ -21,11 +23,20 @@ namespace SecuritySWD62A2025.Areas.Identity.Pages.Account
     {
         private readonly SignInManager<IdentityUser> _signInManager;
         private readonly ILogger<LoginModel> _logger;
+        private EncryptionUtility _encryptionUtility;
+        private KeysRepository _keysRepository;
 
-        public LoginModel(SignInManager<IdentityUser> signInManager, ILogger<LoginModel> logger)
+        public LoginModel(SignInManager<IdentityUser> signInManager, 
+            ILogger<LoginModel> logger,
+            EncryptionUtility encryptionUtility,
+            KeysRepository keysRepository
+            )
         {
             _signInManager = signInManager;
             _logger = logger;
+
+            _encryptionUtility = encryptionUtility;
+            _keysRepository = keysRepository;
         }
 
         /// <summary>
@@ -116,6 +127,11 @@ namespace SecuritySWD62A2025.Areas.Identity.Pages.Account
                 var result = await _signInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure: true);
                 if (result.Succeeded)
                 {
+                    var keys  = _encryptionUtility.GenerateAsymmetricKeys();
+                    keys.Username = Input.Email;
+                    if(_keysRepository.GetKeys(Input.Email) == null)
+                        _keysRepository.AddKeys(keys);
+
                     _logger.LogInformation("User logged in.");
                     return LocalRedirect(returnUrl);
                 }

@@ -51,6 +51,7 @@ namespace SecuritySWD62A2025
             builder.Services.AddScoped<ArtifactsRepository>();
             builder.Services.AddScoped<ArticlesRepository>();
             builder.Services.AddScoped<EncryptionUtility>();
+            builder.Services.AddScoped<KeysRepository>();
            
             var app = builder.Build();
 
