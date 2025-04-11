@@ -22,5 +22,7 @@ namespace SecuritySWD62A2025.Models.DatabaseModels
 
         public string Digest { get; set; }
 
+        public string? Signature { get; set; }
+
     }
 }

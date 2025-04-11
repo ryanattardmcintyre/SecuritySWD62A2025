@@ -177,6 +177,25 @@ namespace SecuritySWD62A2025.Utilities
             return output;
         }
 
+        public string DigitallySign(MemoryStream input, string privateKey)
+        {
+            RSACryptoServiceProvider RSA = new RSACryptoServiceProvider();
+            RSA.FromXmlString(privateKey);
+            byte[] inputAsBytes = input.ToArray();
+            byte[] signatureAsBytes = RSA.SignData(inputAsBytes,
+                new HashAlgorithmName("SHA512"), RSASignaturePadding.Pkcs1);
+
+            return Convert.ToBase64String(signatureAsBytes);
+        }
+
+
+        public bool DigitallyVerify(MemoryStream input, string publicKey, string signature)
+        {
+            byte[] signatureAsBytes = Convert.FromBase64String(signature);
+            //incomplete method
+            return true; //<<change this with VerifyData(...);
+        }
+
     }
 
     public class SymmetricKeys

@@ -17,6 +17,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
+using SecuritySWD62A2025.Repositories;
 
 namespace SecuritySWD62A2025.Areas.Identity.Pages.Account
 {
@@ -29,13 +30,13 @@ namespace SecuritySWD62A2025.Areas.Identity.Pages.Account
         private readonly IUserEmailStore<IdentityUser> _emailStore;
         private readonly IEmailSender _emailSender;
         private readonly ILogger<ExternalLoginModel> _logger;
-
+        private readonly KeysRepository _keysRepository;
         public ExternalLoginModel(
             SignInManager<IdentityUser> signInManager,
             UserManager<IdentityUser> userManager,
             IUserStore<IdentityUser> userStore,
             ILogger<ExternalLoginModel> logger,
-            IEmailSender emailSender)
+            IEmailSender emailSender, KeysRepository keysRepository)
         {
             _signInManager = signInManager;
             _userManager = userManager;
@@ -43,6 +44,7 @@ namespace SecuritySWD62A2025.Areas.Identity.Pages.Account
             _emailStore = GetEmailStore();
             _logger = logger;
             _emailSender = emailSender;
+            _keysRepository = keysRepository;
         }
 
         /// <summary>
@@ -115,7 +117,16 @@ namespace SecuritySWD62A2025.Areas.Identity.Pages.Account
             var result = await _signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, isPersistent: false, bypassTwoFactor: true);
             if (result.Succeeded)
             {
-                //........
+                //........generated the Asymmetric Keys
+                //store the keys into the database for the user about to be registered in db
+
+                //string email = info.Principal.Identity.Name;
+                //var keys = _encryptionUtility.GenerateAsymmetricKeys();
+                //keys.Username = Input.Email;
+                //if (_keysRepository.GetKeys(email) == null)
+                //    _keysRepository.AddKeys(keys);
+
+
                 _logger.LogInformation("{Name} logged in with {LoginProvider} provider.", info.Principal.Identity.Name, info.LoginProvider);
                 return LocalRedirect(returnUrl);
             }

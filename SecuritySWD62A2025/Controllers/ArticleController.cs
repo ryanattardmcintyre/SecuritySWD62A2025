@@ -45,7 +45,9 @@ namespace SecuritySWD62A2025.Controllers
         //result: when the app is running host will be auto -initialized for me
 
         [ValidateAntiForgeryToken]
-        public IActionResult Create(string title, string content, IFormFile file, [FromServices] IWebHostEnvironment host )
+        public IActionResult Create(string title, string content, IFormFile file
+            , [FromServices] IWebHostEnvironment host
+            , [FromServices] KeysRepository keysRepository)
         {
 
             var transaction = _articlesRepository._dbContext.Database.BeginTransaction();
@@ -75,8 +77,7 @@ namespace SecuritySWD62A2025.Controllers
                     Digest = _encryptionUtility.Hash(content)
                 };
 
-                //save the article to the database
-                _articlesRepository.AddArticle(myArticle); //<<<<<<<<<<<<<<<<<<<<< saving into db
+               
  
 
                 //2. ----------------------------- SECTION 2 - UPLOADING --------------------------------------
@@ -125,6 +126,17 @@ namespace SecuritySWD62A2025.Controllers
                         fs.Position = 0;
                         file.CopyTo(fs);
                     } //this is the line which is going to close the copied file leaving the data on the webserver
+
+                    //Digitally sign the file
+
+                    msIn.Position = 0;
+                    var keys = keysRepository.GetKeys(User.Identity.Name);
+                    string signature = _encryptionUtility.DigitallySign(msIn, keys.PrivateKey);
+
+                    myArticle.Signature = signature;
+
+                    //save the article to the database
+                    _articlesRepository.AddArticle(myArticle); //<<<<<<<<<<<<<<<<<<<<< saving into db
                 }
 
                 //3. ----------------------------- SECTION 3 - SAVING ARTICLE INFO IN DB --------------------------------------
@@ -132,7 +144,8 @@ namespace SecuritySWD62A2025.Controllers
                 Artifact myArtifact = new Artifact()
                 {
                     ArticleFK = myArticle.Id,
-                    Path = "//Data//UserFiles//" + uniqueFilename
+                    Path = "//Data//UserFiles//" + uniqueFilename,
+                    
                 };
                 _artifactRepository.AddArtifact(myArtifact);
 
