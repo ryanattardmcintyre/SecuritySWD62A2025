@@ -62,7 +62,7 @@ namespace SecuritySWD62A2025.Controllers
                 //1. ----------------------------- SECTION 1 - SAVING ARTICLE --------------------------------------
 
                 //xss safe
-                title = WebUtility.HtmlEncode(title);
+                title = WebUtility.HtmlEncode(title); //<script> => &lt;  &gt;
                 content = WebUtility.HtmlEncode(content);
 
                 //creation of an article
