@@ -55,6 +55,9 @@ namespace SecuritySWD62A2025.Utilities
 
         public MemoryStream SymmetricEncrypt(MemoryStream inputStream, SymmetricAlgorithm alg, SymmetricKeys keys)
         {
+            alg.Mode = CipherMode.ECB;
+            alg.Padding = PaddingMode.ANSIX923;
+
             //Creating a memorystream to be used throughout the method, because it gives us
             //two important methods that facilitate the work a lot
             //1. CopyTo()
